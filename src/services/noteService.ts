@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { type Note } from '../types/../types/note';
 const myKey = import.meta.env.VITE_NOTEHUB_TOKEN;
-const url = 'https://notehub-public.goit.study/api/notes';
+
 const options = {
   headers: {
     accept: 'application/json',
@@ -13,8 +13,12 @@ interface NotesResponse {
   notes: Note[];
   totalPages: number;
 }
-const fetchNotes = async (): Promise<NotesResponse> => {
-  const { data } = await axios.get<NotesResponse>(url, options);
+const fetchNotes = async (currentPage: number): Promise<NotesResponse> => {
+  const { data } = await axios.get<NotesResponse>(
+    `https://notehub-public.goit.study/api/notes?page=${currentPage}&perPage=12`,
+    options
+  );
+
   return {
     notes: data.notes,
     totalPages: data.totalPages,
