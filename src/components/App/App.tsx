@@ -3,16 +3,24 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import NoteList from '../NoteList/NoteList';
 import css from './App.module.css';
 import ReactPaginate from 'react-paginate';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import style from '../Pagination/Pagination.module.css';
+import Modal from '../Modal/Modal';
+import NoteForm from '../NoteForm /NoteForm';
+import { type Note } from '../../types/note';
 
 function App() {
   const [currentPage, setCurrentPage] = useState(1);
-  const { isPending, error, data } = useQuery({
+  const { data } = useQuery({
     queryKey: ['data', currentPage],
     queryFn: () => fetchNotes(currentPage),
     placeholderData: keepPreviousData,
   });
+
+  type NoteValueWithoutId = Omit<Note, 'id'>;
+  const getFormValues = (values: NoteValueWithoutId) => {
+    console.log(values);
+  };
 
   const totalPages = data?.totalPages ?? 0;
   return (
@@ -33,11 +41,14 @@ function App() {
               previousLabel='←'
             />
           )}
-          {/* Кнопка створення нотатки */}
+          <button className={css.button}>Create note +</button>
         </header>
       </div>
-
       {data && <NoteList notes={data.notes} />}
+
+      <Modal>
+        <NoteForm getFormValues={getFormValues} />
+      </Modal>
     </>
   );
 }
