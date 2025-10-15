@@ -37,7 +37,7 @@ function App() {
 
   const queryClient = useQueryClient();
 
-  const { data, isError, isFetching } = useQuery({
+  const { data, isError, isLoading } = useQuery({
     queryKey: ['data', currentPage, text],
     queryFn: () => fetchNotes(currentPage, text),
     placeholderData: keepPreviousData,
@@ -114,7 +114,7 @@ function App() {
         </header>
       </div>
       {(isError || isErrors) && <ErrorMessage />}
-      {(isFetching || isLoad) && <Loader />}
+      {isLoading && <Loader />}
 
       {data && <NoteList notes={data.notes} deleteNote={deteteNote} />}
 
