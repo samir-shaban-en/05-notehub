@@ -32,7 +32,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isErrors, setisErrors] = useState(false);
-  const [isLoad, setisLoad] = useState(false);
+
   const [text, setText] = useState('');
 
   const queryClient = useQueryClient();
@@ -48,11 +48,10 @@ function App() {
 
   const mutationCreateNotation = useMutation({
     mutationFn: async (values: NoteValueWithoutId) => {
-      setisLoad(true);
       await createNotes(values);
     },
     onSuccess: () => {
-      setisLoad(false);
+      setisErrors(false);
       queryClient.invalidateQueries({ queryKey: ['data'] });
     },
     onError: () => {
@@ -66,11 +65,10 @@ function App() {
 
   const mutationDeleteNotation = useMutation({
     mutationFn: async (noteId: string) => {
-      setisLoad(true);
       await deleteNote(noteId);
     },
     onSuccess: () => {
-      setisLoad(false);
+      setisErrors(false);
       queryClient.invalidateQueries({ queryKey: ['data'] });
     },
     onError: () => {
