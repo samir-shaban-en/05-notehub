@@ -1,36 +1,45 @@
+import NoteList from '../NoteList/NoteList';
+import Modal from '../Modal/Modal';
+import NoteForm from '../NoteForm /NoteForm';
+import ReactPaginate from 'react-paginate';
+import SearchBox from '../SearchBox/SearchBox';
+
 import {
   fetchNotes,
   createNotes,
   deleteNote,
 } from '../../services/noteService';
+
 import {
   useMutation,
   useQuery,
   keepPreviousData,
   useQueryClient,
 } from '@tanstack/react-query';
-import NoteList from '../NoteList/NoteList';
+
+import { useDebouncedCallback } from 'use-debounce';
+
+import { useState, useEffect } from 'react';
+
 import css from './App.module.css';
-import ReactPaginate from 'react-paginate';
-import { useState } from 'react';
 import style from '../Pagination/Pagination.module.css';
-import Modal from '../Modal/Modal';
-import NoteForm from '../NoteForm /NoteForm';
+
 import { type NoteValueWithoutId } from '../../types/note';
 
 function App() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [text, setText] = useState('');
+
   const queryClient = useQueryClient();
 
   const { data } = useQuery({
-    queryKey: ['data', currentPage],
-    queryFn: () => fetchNotes(currentPage),
+    queryKey: ['data', currentPage, text],
+    queryFn: () => fetchNotes(currentPage, text),
     placeholderData: keepPreviousData,
   });
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
-
   const closeModal = () => setIsModalOpen(false);
 
   const mutationCreateNotation = useMutation({
@@ -66,11 +75,22 @@ function App() {
   };
 
   const totalPages = data?.totalPages ?? 0;
+
+  const handleChange = useDebouncedCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => setText(event.target.value),
+    1000
+  );
+
+  useEffect(() => {
+    console.log(`Make HTTP request with: ${text}`);
+  }, [text]);
+
   return (
     <>
       <div className={css.app}>
         <header className={css.toolbar}>
-          {/* Компонент SearchBox */}
+          <SearchBox onChange={handleChange} />
+
           {totalPages > 0 && (
             <ReactPaginate
               pageCount={totalPages}
@@ -89,6 +109,7 @@ function App() {
           </button>
         </header>
       </div>
+
       {data && <NoteList notes={data.notes} deleteNote={deteteNote} />}
 
       {isModalOpen && (
