@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { type Note } from '../types/../types/note';
 import { type NoteValueWithoutId } from '../types/note';
-const myKey = import.meta.env.VITE_NOTEHUB_TOKEN;
+const myKey = import.meta.env.VITE_NOTEHUB_TOK;
 
 const options = {
   headers: {
