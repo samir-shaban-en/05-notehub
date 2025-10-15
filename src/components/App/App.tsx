@@ -1,6 +1,6 @@
 import NoteList from '../NoteList/NoteList';
 import Modal from '../Modal/Modal';
-import NoteForm from '../NoteForm /NoteForm';
+import NoteForm from '../NoteForm/NoteForm.tsx';
 import ReactPaginate from 'react-paginate';
 import SearchBox from '../SearchBox/SearchBox';
 import Loader from '../Loader/Loader';
