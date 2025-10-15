@@ -4,3 +4,5 @@ export interface Note {
   content: string;
   tag: string;
 }
+
+export type NoteValueWithoutId = Omit<Note, 'id'>;
