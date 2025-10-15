@@ -3,6 +3,8 @@ import Modal from '../Modal/Modal';
 import NoteForm from '../NoteForm /NoteForm';
 import ReactPaginate from 'react-paginate';
 import SearchBox from '../SearchBox/SearchBox';
+import Loader from '../Loader/Loader';
+import ErrorMessage from '../ErrorMessage/ErrorMessage.tsx';
 
 import {
   fetchNotes,
@@ -19,7 +21,7 @@ import {
 
 import { useDebouncedCallback } from 'use-debounce';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import css from './App.module.css';
 import style from '../Pagination/Pagination.module.css';
@@ -29,11 +31,13 @@ import { type NoteValueWithoutId } from '../../types/note';
 function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isErrors, setisErrors] = useState(false);
+  const [isLoad, setisLoad] = useState(false);
   const [text, setText] = useState('');
 
   const queryClient = useQueryClient();
 
-  const { data } = useQuery({
+  const { data, isError, isFetching } = useQuery({
     queryKey: ['data', currentPage, text],
     queryFn: () => fetchNotes(currentPage, text),
     placeholderData: keepPreviousData,
@@ -44,13 +48,15 @@ function App() {
 
   const mutationCreateNotation = useMutation({
     mutationFn: async (values: NoteValueWithoutId) => {
+      setisLoad(true);
       await createNotes(values);
     },
     onSuccess: () => {
+      setisLoad(false);
       queryClient.invalidateQueries({ queryKey: ['data'] });
     },
     onError: () => {
-      // An error happened!
+      setisErrors(true);
     },
   });
 
@@ -60,13 +66,15 @@ function App() {
 
   const mutationDeleteNotation = useMutation({
     mutationFn: async (noteId: string) => {
+      setisLoad(true);
       await deleteNote(noteId);
     },
     onSuccess: () => {
+      setisLoad(false);
       queryClient.invalidateQueries({ queryKey: ['data'] });
     },
     onError: () => {
-      // An error happened!
+      setisErrors(true);
     },
   });
 
@@ -80,10 +88,6 @@ function App() {
     (event: React.ChangeEvent<HTMLInputElement>) => setText(event.target.value),
     1000
   );
-
-  useEffect(() => {
-    console.log(`Make HTTP request with: ${text}`);
-  }, [text]);
 
   return (
     <>
@@ -109,6 +113,8 @@ function App() {
           </button>
         </header>
       </div>
+      {(isError || isErrors) && <ErrorMessage />}
+      {(isFetching || isLoad) && <Loader />}
 
       {data && <NoteList notes={data.notes} deleteNote={deteteNote} />}
 
