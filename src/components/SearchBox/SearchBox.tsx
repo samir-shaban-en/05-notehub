@@ -1,4 +1,4 @@
-import css from './SeatchBox.module.css';
+import css from './SearchBox.module.css';
 interface SearchBoxProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { type Note } from '../types/../types/note';
-import { type NoteValueWithoutId } from '../types/note';
-const myKey = import.meta.env.VITE_NOTEHUB_TOK;
+import { type NewNote } from '../types/note';
+const myKey = import.meta.env.VITE_NOTEHUB_TOKEN;
 
 const options = {
   headers: {
@@ -29,23 +29,23 @@ const fetchNotes = async (
   };
 };
 
-const createNotes = async (values: NoteValueWithoutId) => {
-  const res = await axios.post(
+const createNote = async (values: NewNote): Promise<Note> => {
+  const res = await axios.post<Note>(
     'https://notehub-public.goit.study/api/notes',
     values,
     options
   );
+
   return res.data;
 };
 
-const deleteNote = async (noteId: string) => {
-  console.log(noteId);
-  const res = await axios.delete(
+const deleteNote = async (noteId: string): Promise<Note> => {
+  const res = await axios.delete<Note>(
     `https://notehub-public.goit.study/api/notes/${noteId}`,
     options
   );
-  console.log(res.data);
+
   return res.data;
 };
 
-export { fetchNotes, createNotes, deleteNote };
+export { fetchNotes, createNote, deleteNote };

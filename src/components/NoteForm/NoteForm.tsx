@@ -1,43 +1,54 @@
 import css from './NoteForm.module.css';
-
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createNote } from '../../services/noteService';
 import { Field, Form, Formik, type FormikHelpers, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { type NoteValueWithoutId } from '../../types/note';
+import { type NewNote } from '../../types/note';
 
 const validateForm = Yup.object().shape({
   title: Yup.string()
     .min(3, 'Title must be at least 3 characters')
     .max(50, 'Title is too long')
-    .required('Username is required'),
-  conten: Yup.string().max(500, 'Conten is too long'),
+    .required('Title is required'),
+  content: Yup.string().max(500, 'Conten is too long'),
   tag: Yup.string()
     .oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'] as const)
     .required('Tag is required'),
 });
 
-interface NoteFormPropr {
-  getFormValues: (values: NoteValueWithoutId) => void;
+interface NoteFormProps {
   onClose: () => void;
 }
-const initialValues: NoteValueWithoutId = {
+const initialValues: NewNote = {
   title: '',
   content: '',
   tag: 'Todo',
 };
 
-const NoteForm = ({ getFormValues, onClose }: NoteFormPropr) => {
-  const handleSubmit = (
-    values: NoteValueWithoutId,
-    actions: FormikHelpers<NoteValueWithoutId>
+const NoteForm = ({ onClose }: NoteFormProps) => {
+  const queryClient = useQueryClient();
+
+  const handleCreateNote = (
+    values: NewNote,
+    actions: FormikHelpers<NewNote>
   ) => {
-    getFormValues(values);
+    mutationCreateNote.mutate(values);
     actions.resetForm();
   };
+
+  const mutationCreateNote = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['data'] });
+
+      onClose();
+    },
+  });
 
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={handleSubmit}
+      onSubmit={handleCreateNote}
       validationSchema={validateForm}>
       <Form className={css.form}>
         <div className={css.formGroup}>

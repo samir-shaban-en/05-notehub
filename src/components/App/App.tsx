@@ -6,18 +6,9 @@ import SearchBox from '../SearchBox/SearchBox';
 import Loader from '../Loader/Loader';
 import ErrorMessage from '../ErrorMessage/ErrorMessage.tsx';
 
-import {
-  fetchNotes,
-  createNotes,
-  deleteNote,
-} from '../../services/noteService';
+import { fetchNotes } from '../../services/noteService';
 
-import {
-  useMutation,
-  useQuery,
-  keepPreviousData,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -26,16 +17,11 @@ import { useState } from 'react';
 import css from './App.module.css';
 import style from '../Pagination/Pagination.module.css';
 
-import { type NoteValueWithoutId } from '../../types/note';
-
 function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isErrors, setisErrors] = useState(false);
 
   const [text, setText] = useState('');
-
-  const queryClient = useQueryClient();
 
   const { data, isError, isLoading } = useQuery({
     queryKey: ['data', currentPage, text],
@@ -46,44 +32,13 @@ function App() {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const mutationCreateNotation = useMutation({
-    mutationFn: async (values: NoteValueWithoutId) => {
-      await createNotes(values);
-    },
-    onSuccess: () => {
-      setisErrors(false);
-      queryClient.invalidateQueries({ queryKey: ['data'] });
-    },
-    onError: () => {
-      setisErrors(true);
-    },
-  });
-
-  const getFormValues = (values: NoteValueWithoutId) => {
-    mutationCreateNotation.mutate(values);
-  };
-
-  const mutationDeleteNotation = useMutation({
-    mutationFn: async (noteId: string) => {
-      await deleteNote(noteId);
-    },
-    onSuccess: () => {
-      setisErrors(false);
-      queryClient.invalidateQueries({ queryKey: ['data'] });
-    },
-    onError: () => {
-      setisErrors(true);
-    },
-  });
-
-  const deteteNote = (noteId: string) => {
-    mutationDeleteNotation.mutate(noteId);
-  };
-
   const totalPages = data?.totalPages ?? 0;
 
   const handleChange = useDebouncedCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => setText(event.target.value),
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setText(event.target.value);
+      setCurrentPage(1);
+    },
     1000
   );
 
@@ -111,14 +66,14 @@ function App() {
           </button>
         </header>
       </div>
-      {(isError || isErrors) && <ErrorMessage />}
+      {isError && <ErrorMessage />}
       {isLoading && <Loader />}
 
-      {data && <NoteList notes={data.notes} deleteNote={deteteNote} />}
+      {data && <NoteList notes={data.notes} />}
 
       {isModalOpen && (
         <Modal onClose={closeModal}>
-          <NoteForm getFormValues={getFormValues} onClose={closeModal} />
+          <NoteForm onClose={closeModal} />
         </Modal>
       )}
     </>
